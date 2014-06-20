@@ -1,0 +1,129 @@
+---
+title: "Prediction Assignment Writeup"
+author: "Alexander Seifert"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(knitr); opts_chunk$set(cache=TRUE)
+```
+
+
+0.991
+
+# Introduction
+
+Human activity recognition research has traditionally focused on discriminating between different activities, i.e. to predict "which" activity was performed at a specific point in time (like with the Daily Living Activities dataset above).
+
+In this project, we will use data from accelerometers on the belt, forearm, arm, and dumbell of 6 test participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways:
+
+* exactly according to the specification (Class A)
+* throwing the elbows to the front (Class B)
+* lifting the dumbbell only halfway (Class C)
+* lowering the dumbbell only halfway (Class D) and
+* throwing the hips to the front (Class E)
+
+More information on the study that collected the data is available on the Groupware@LES [Human Activity Recognition project website](http://groupware.les.inf.puc-rio.br/har#ixzz34oK3Rck9).
+
+We will try to predict from the sensory data the way in which the exercise was performed.
+
+# Data Preprocessing
+
+First we set the seed, so our analysis is reproducible. We then load the training and testing data. Some of the data contained "#DIV/0!" entries, which most likely came from an illegal division by 0. We treat those as NAs.
+
+```{r}
+set.seed(42)
+library(caret)
+
+training.raw = read.csv("pml-training.csv", na.strings = c("", "NA", "#DIV/0!"))
+testing.raw  = read.csv("pml-testing.csv", na.strings = c("", "NA", "#DIV/0!"))
+```
+
+
+As a next step, we remove near zero variance predictors.
+
+```{r}
+nzv  = nearZeroVar(training.raw, saveMetrics=TRUE)
+omit = which(nzv$nzv==TRUE)
+training.new = training.raw[,-omit]
+```
+
+Let's see how NAs are distributed
+```{r}
+NAs = apply(training.new, 2, function(x) { sum(is.na(x)) })
+summary(NAs)
+```
+
+As we can see a variable contains either no NAs or very many. Variables with such a large number of NAs are useless and can't be reliably imputed, so we throw them out:
+```{r}
+good.cols = names(NAs[NAs == 0])
+```
+
+
+From the remaining variables, we keep only those coming from sensory input:
+```{r}
+predictors = grep("(_belt|_arm|_dumbbell|_forearm)", good.cols, value=T)
+```
+
+
+Now we create a new training set with only the predictors and the output (`classe`)
+```{r}
+training.new = cbind(training.new[,c(predictors, "classe")])
+```
+
+Having done these steps, we can move on to model creation.
+
+
+## Model Creation
+
+First, we create a 60/40 data partition for training/validation set:
+```{r}
+intrain  = createDataPartition(training.new$classe, p = 0.6, list = FALSE)
+training = training.new[intrain,]
+validate = training.new[-intrain,]
+```
+
+Now we can train our model. We will use 4-fold cross validation and fit a random forest model to the training set.
+```{r}
+trc = trainControl(method = "cv", number = 4, allowParallel=T)
+rf.fit = train(classe ~ .,
+               data = training,
+               method = "rf",
+               trControl = trc)
+
+```
+
+
+## Model Evaluation
+
+Finally, we can use our validation set to evaluate our model along different dimensions:
+
+```{r}
+rf.pred = predict(rf.fit, validate)
+confusionMatrix(rf.pred, validate$classe)
+```
+
+With the accuracy being `0.991` we get an out of sample error of `1 - 0.991 = 0.009`.
+
+
+## Test Output
+
+```{r}
+testing = testing.raw[, names(training)[-53]]
+answers = predict(rf.fit, testing)
+
+answers
+```
+
+
+write output:
+```{r}
+pml_write_files = function(x){
+        n = length(x)
+        for(i in 1:n){
+                filename = paste0("problem_id_",i,".txt")
+                write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+        }
+}
+pml_write_files(answers)
+```
