@@ -8,8 +8,8 @@ output: html_document
 library(knitr); opts_chunk$set(cache=TRUE)
 ```
 
+This project builds a machine learning algorithm to predict activity quality from activity monitors. By creating a random forest model we achieve an accuracy of `0.991` (out of sample error `0.009`) on the validation set (60/40 split) and 100% accuracy on the test set.
 
-0.991
 
 # Introduction
 
@@ -48,14 +48,10 @@ omit = which(nzv$nzv==TRUE)
 training.new = training.raw[,-omit]
 ```
 
-Let's see how NAs are distributed
+Let's weed out the NA heavy colums
 ```{r}
 NAs = apply(training.new, 2, function(x) { sum(is.na(x)) })
 summary(NAs)
-```
-
-As we can see a variable contains either no NAs or very many. Variables with such a large number of NAs are useless and can't be reliably imputed, so we throw them out:
-```{r}
 good.cols = names(NAs[NAs == 0])
 ```
 
@@ -76,7 +72,7 @@ Having done these steps, we can move on to model creation.
 
 ## Model Creation
 
-First, we create a 60/40 data partition for training/validation set:
+First, we create a 60/40 data split for training/validation set:
 ```{r}
 intrain  = createDataPartition(training.new$classe, p = 0.6, list = FALSE)
 training = training.new[intrain,]
@@ -108,6 +104,7 @@ With the accuracy being `0.991` we get an out of sample error of `1 - 0.991 = 0.
 
 ## Test Output
 
+We predict the test answers
 ```{r}
 testing = testing.raw[, names(training)[-53]]
 answers = predict(rf.fit, testing)
@@ -116,7 +113,7 @@ answers
 ```
 
 
-write output:
+… and write those answers to disk:
 ```{r}
 pml_write_files = function(x){
         n = length(x)
