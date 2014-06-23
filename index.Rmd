@@ -11,7 +11,7 @@ library(knitr); opts_chunk$set(cache=TRUE)
 This project builds a machine learning algorithm to predict activity quality from activity monitors. By creating a [random forest](https://en.wikipedia.org/wiki/Random_forest) we achieve an accuracy of `0.991` (out of sample error `0.009`) on the validation set (60/40 split) and `100%` accuracy on the test set.
 
 
-# Introduction
+## Introduction
 
 Human activity recognition research has traditionally focused on discriminating between different activities, i.e. to predict "which" activity was performed at a specific point in time (like with the Daily Living Activities dataset above).
 
@@ -27,7 +27,7 @@ In this project, we will use data from accelerometers on the belt, forearm, arm,
 
 We will try to predict from the sensory data the way in which the exercise was performed (i.e. class A to E).
 
-# Data Preprocessing
+## Data Preprocessing
 
 First we set the seed, so our analysis is reproducible. We then load the training and testing data. Some of the data contained "#DIV/0!" entries, which most likely came from an illegal division by 0. We treat those as NAs.
 
