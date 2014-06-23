@@ -51,7 +51,7 @@ training.new = training.raw[,-omit]
 Let's weed out the NA heavy colums
 ```{r}
 NAs = apply(training.new, 2, function(x) { sum(is.na(x)) })
-summary(NAs)
+qplot(NAs, binwidth = max(NAs)/30)
 good.cols = names(NAs[NAs == 0])
 ```
 
