@@ -58,7 +58,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </div>
 
 
-<p>This project builds a machine learning algorithm to predict activity quality from activity monitors. By creating a random forest model we achieve an accuracy of <code>0.991</code> (out of sample error <code>0.009</code>) on the validation set (60/40 split) and 100% accuracy on the test set.</p>
+<p>This project builds a machine learning algorithm to predict activity quality from activity monitors. By creating a <a href="https://en.wikipedia.org/wiki/Random_forest">random forest</a> we achieve an accuracy of <code>0.991</code> (out of sample error <code>0.009</code>) on the validation set (60/40 split) and <code>100%</code> accuracy on the test set.</p>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>Human activity recognition research has traditionally focused on discriminating between different activities, i.e. to predict “which” activity was performed at a specific point in time (like with the Daily Living Activities dataset above).</p>
@@ -70,8 +70,8 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li>lowering the dumbbell only halfway (Class D) and</li>
 <li>throwing the hips to the front (Class E)</li>
 </ul>
-<p>More information on the study that collected the data is available on the <a href="mailto:Groupware@LES">Groupware@LES</a> <a href="http://groupware.les.inf.puc-rio.br/har#ixzz34oK3Rck9">Human Activity Recognition project website</a>.</p>
-<p>We will try to predict from the sensory data the way in which the exercise was performed.</p>
+<p>(More information on the study that collected the data is available on the Groupware@LES <a href="http://groupware.les.inf.puc-rio.br/har#ixzz34oK3Rck9">Human Activity Recognition project website</a>.)</p>
+<p>We will try to predict from the sensory data the way in which the exercise was performed (i.e. class A to E).</p>
 </div>
 <div id="data-preprocessing" class="section level1">
 <h1>Data Preprocessing</h1>
@@ -102,7 +102,7 @@ qplot(NAs, binwidth = max(NAs)/30)</code></pre>
 <pre class="r"><code>intrain  = createDataPartition(training.new$classe, p = 0.6, list = FALSE)
 training = training.new[intrain,]
 validate = training.new[-intrain,]</code></pre>
-<p>Now we can train our model. We will use 4-fold cross validation and fit a random forest model to the training set.</p>
+<p>Now we can train our model. We will use <a href="https://en.wikipedia.org/wiki/Cross-validation_(statistics)">4-fold cross validation</a> and fit a random forest to the training set.</p>
 <pre class="r"><code>trc = trainControl(method = &quot;cv&quot;, number = 4, allowParallel=T)
 rf.fit = train(classe ~ .,
                data = training,
